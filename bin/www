@@ -2,7 +2,7 @@ const http = require("node:http");
 const path = require("node:path");
 const fs = require("node:fs");
 const url = require("node:url");
-const people = require("./../data/people");
+const { people } = require("./../data/people");
 
 const PUBLIC_DIRECTORY = path.join(__dirname, "..", "public");
 const port = process.env.PORT || 3000;
@@ -16,20 +16,14 @@ const onRequest = (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
 
-  console.log(`parsedUrl : ${parsedUrl}`);
-  console.log(`pathname : ${pathname}`);
-
   const pathSegments = pathname.split("/").filter((p) => p);
   let simplifiedPath = pathname;
-
-  console.log(`pathSegments : ${pathSegments}`);
-  console.log(`simplifiedPath : ${simplifiedPath}`);
 
   if (pathSegments.length === 2 && pathSegments[0] === "people") {
     simplifiedPath = "/people/:id";
   }
 
-  switch (req.url) {
+  switch (simplifiedPath) {
     case "/":
       res.writeHead(200);
       res.end(fs.readFileSync(getHTML("index.html")));
