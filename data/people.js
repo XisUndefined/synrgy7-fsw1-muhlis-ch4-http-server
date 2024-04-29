@@ -59,6 +59,12 @@ const people = [
     username: "Moriah.Stanton",
     email: "Rey.Padberg@karina.biz",
   },
+  {
+    id: 3,
+    name: "Samuel L Jackson",
+    username: "Samuel",
+    email: "Nickfury@shield.net",
+  },
 ];
 
 module.exports = { people };

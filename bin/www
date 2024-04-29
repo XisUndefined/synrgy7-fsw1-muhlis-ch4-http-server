@@ -16,6 +16,7 @@ const onRequest = (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
   const method = req.method;
+  const query = parsedUrl.query;
 
   const pathSegments = pathname.split("/").filter((p) => p);
   let simplifiedPath = pathname;
@@ -26,6 +27,12 @@ const onRequest = (req, res) => {
     } else {
       simplifiedPath = "/people/:id";
     }
+  } else if (
+    pathSegments.length === 3 &&
+    pathSegments[0] === "people" &&
+    pathSegments[1] === "username"
+  ) {
+    simplifiedPath = "/people/username/search";
   }
 
   switch (simplifiedPath) {
@@ -52,16 +59,11 @@ const onRequest = (req, res) => {
         res.end(JSON.stringify({ error: "Data not found" }));
       }
       break;
-    case "/people/username/:username":
-      const username = pathSegments[2];
-      const personByUsername = people.find((p) => p.username === username);
-      if (personByUsername) {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(personByUsername));
-      } else {
-        res.writeHead(404, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Username not found" }));
-      }
+    case "/people/username/search":
+      const searchTerm = query.username;
+      const matches = people.filter((p) => p.username.includes(searchTerm));
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(matches));
       break;
     case "/delete/people/:id":
       const deleteId = parseInt(pathSegments[1]);
