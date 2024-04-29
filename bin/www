@@ -1,0 +1,67 @@
+const http = require("node:http");
+const path = require("node:path");
+const fs = require("node:fs");
+const url = require("node:url");
+const people = require("./../data/people");
+
+const PUBLIC_DIRECTORY = path.join(__dirname, "..", "public");
+const port = process.env.PORT || 3000;
+
+const getHTML = (htmlFileName) => {
+  const htmlFilePath = path.join(PUBLIC_DIRECTORY, htmlFileName);
+  return htmlFilePath;
+};
+
+const onRequest = (req, res) => {
+  const parsedUrl = url.parse(req.url, true);
+  const pathname = parsedUrl.pathname;
+
+  console.log(`parsedUrl : ${parsedUrl}`);
+  console.log(`pathname : ${pathname}`);
+
+  const pathSegments = pathname.split("/").filter((p) => p);
+  let simplifiedPath = pathname;
+
+  console.log(`pathSegments : ${pathSegments}`);
+  console.log(`simplifiedPath : ${simplifiedPath}`);
+
+  if (pathSegments.length === 2 && pathSegments[0] === "people") {
+    simplifiedPath = "/people/:id";
+  }
+
+  switch (req.url) {
+    case "/":
+      res.writeHead(200);
+      res.end(fs.readFileSync(getHTML("index.html")));
+      break;
+    case "/about":
+      res.writeHead(200);
+      res.end(fs.readFileSync(getHTML("about/index.html")));
+      break;
+    case "/people":
+      res.writeHead(200);
+      res.end(JSON.stringify(people));
+      break;
+    case "/people:id":
+      const id = parseInt(pathSegments[1]);
+      const person = people.find((p) => p.id === id);
+      if (person) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(person));
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Data not found" }));
+      }
+      break;
+    default:
+      res.writeHead(404);
+      res.end(fs.readFileSync(getHTML("404.html")));
+      break;
+  }
+};
+
+const server = http.createServer(onRequest);
+
+server.listen(port, "localhost", () => {
+  console.log(`Server listening on http://localhost:${port}`);
+});
