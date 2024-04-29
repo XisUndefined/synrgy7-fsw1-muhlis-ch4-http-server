@@ -20,7 +20,11 @@ const onRequest = (req, res) => {
   let simplifiedPath = pathname;
 
   if (pathSegments.length === 2 && pathSegments[0] === "people") {
-    simplifiedPath = "/people/:id";
+    if (method === "DELETE") {
+      simplifiedPath = "/delete/people/:id";
+    } else {
+      simplifiedPath = "/people/:id";
+    }
   }
 
   switch (simplifiedPath) {
@@ -45,6 +49,29 @@ const onRequest = (req, res) => {
       } else {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Data not found" }));
+      }
+      break;
+    case "/people/username/:username":
+      const username = pathSegments[2];
+      const personByUsername = people.find((p) => p.username === username);
+      if (personByUsername) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(personByUsername));
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Username not found" }));
+      }
+      break;
+    case "/delete/people/:id":
+      const deleteId = parseInt(pathSegments[1]);
+      const index = people.findIndex((p) => p.id === deleteId);
+      if (index !== -1) {
+        people.splice(index, 1);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Person deleted successfully" }));
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Person not found to delete" }));
       }
       break;
     default:
