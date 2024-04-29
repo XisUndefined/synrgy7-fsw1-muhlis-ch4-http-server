@@ -42,7 +42,7 @@ const onRequest = (req, res) => {
       res.writeHead(200);
       res.end(JSON.stringify(people));
       break;
-    case "/people:id":
+    case "/people/:id":
       const id = parseInt(pathSegments[1]);
       const person = people.find((p) => p.id === id);
       if (person) {
